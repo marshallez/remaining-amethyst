@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import net.runelite.api.EquipmentInventorySlot;
+import net.runelite.api.InventoryID;
+import net.runelite.api.ItemContainer;
 import net.runelite.api.Player;
 import net.runelite.api.Tile;
 import net.runelite.api.WallObject;
@@ -16,6 +19,7 @@ import net.runelite.api.coords.Direction;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.WallObjectDespawned;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -41,9 +45,14 @@ public class RemainingAmethystPlugin extends Plugin {
     private RemainingAmethystOverlay overlay;
 
     @Getter
-    private WallObject interactingAmethyst = null;
+    private WallObject lastInteractedAmethyst = null;
 
-    private boolean miningGlovesReady;
+    @Getter
+    private Integer maxOreRemaining = -1;
+
+    private boolean wearingExpertMiningGloves = false;
+
+    private int ticksWithoutInteracting = 0;
 
     @Override
     protected void startUp() {
@@ -53,7 +62,9 @@ public class RemainingAmethystPlugin extends Plugin {
     @Override
     protected void shutDown() {
         overlayManager.remove(overlay);
-        interactingAmethyst = null;
+        lastInteractedAmethyst = null;
+        maxOreRemaining = -1;
+        ticksWithoutInteracting = 0;
     }
 
     @Subscribe
@@ -63,14 +74,16 @@ public class RemainingAmethystPlugin extends Plugin {
 
         Tile facingTile = getTilePlayerIsFacing(player);
 
-        if (facingTile.getWallObject() == null) {
-            return;
-        }
-
         if ((facingTile.getWallObject().getId() == 11388 || facingTile.getWallObject().getId() == 11389) && Mining.isMining(player)) {
-            interactingAmethyst = facingTile.getWallObject();
+            lastInteractedAmethyst = facingTile.getWallObject();
+            ticksWithoutInteracting = 0;
         } else {
-            interactingAmethyst = null;
+            ticksWithoutInteracting += 1;
+
+            if (ticksWithoutInteracting >= 5) {
+                lastInteractedAmethyst = null;
+                ticksWithoutInteracting = 0;
+            }
         }
     }
 
@@ -81,15 +94,26 @@ public class RemainingAmethystPlugin extends Plugin {
         if (event.getType() == ChatMessageType.SPAM || event.getType() == ChatMessageType.GAMEMESSAGE) {
             switch (chatMessage) {
                 case "You manage to mine some amethyst.":
-                    System.out.println("amethyst");
+                    this.maxOreRemaining -= 1;
                     break;
                 case "The Varrock platebody enabled you to mine an additional ore.":
-                    System.out.println("varrock");
-                    break;
-                case "Your Expert mining gloves prevents the amethyst crystals from losing a crystal.":
-                    System.out.println("gloves");
+                    this.maxOreRemaining -= 1;
                     break;
             }
+        }
+    }
+
+    @Subscribe
+    public void onWallObjectDespawned(WallObjectDespawned objectDespawned) {
+        if (objectDespawned.getWallObject().equals(this.lastInteractedAmethyst)) {
+
+            ItemContainer equipment = client.getItemContainer(InventoryID.EQUIPMENT);
+            if (equipment.getItem(EquipmentInventorySlot.GLOVES.getSlotIdx()).equals(21392)) {
+                System.out.println("Expert mining gloves detected.");
+                wearingExpertMiningGloves = true;
+            }
+            this.maxOreRemaining = 4;
+            this.lastInteractedAmethyst = null;
         }
     }
 

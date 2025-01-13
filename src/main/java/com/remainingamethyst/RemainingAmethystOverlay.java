@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 
 import javax.inject.Inject;
 
+import net.runelite.api.Point;
 import net.runelite.api.WallObject;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -28,18 +29,31 @@ class RemainingAmethystOverlay extends Overlay {
 
     @Override
     public Dimension render(Graphics2D graphics) {
-        if (plugin.getInteractingAmethyst() == null) {
+        if (plugin.getLastInteractedAmethyst() == null) {
             return null;
         }
 
-        Color greenBorder = ColorUtil.colorWithAlpha(Color.GREEN, 255);
+        Color greenBorder = ColorUtil.colorWithAlpha(Color.GREEN, 200);
 
-        WallObject amethyst = plugin.getInteractingAmethyst();
+        WallObject amethyst = plugin.getLastInteractedAmethyst();
 
         if (amethyst == null) {
             return null;
         }
 
+        String displayedOreRemaining;
+        int offset = 0;
+        if (plugin.getMaxOreRemaining() <= -1) {
+            displayedOreRemaining = "?";
+        } else if (plugin.getMaxOreRemaining() - 1 == 0) {
+            displayedOreRemaining = plugin.getMaxOreRemaining().toString();
+        } else {
+            displayedOreRemaining = (Integer.valueOf(plugin.getMaxOreRemaining() - 1)).toString() + " - " + plugin.getMaxOreRemaining().toString();
+            offset = 10;
+        }
+
+        Point centerPoint = new Point(amethyst.getCanvasLocation(100).getX() - offset, amethyst.getCanvasLocation(100).getY());
+        OverlayUtil.renderTextLocation(graphics, centerPoint, displayedOreRemaining, Color.GREEN);
         OverlayUtil.renderPolygon(graphics, amethyst.getConvexHull(), greenBorder);
         return null;
 
