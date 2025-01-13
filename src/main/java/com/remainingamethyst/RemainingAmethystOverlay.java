@@ -43,7 +43,7 @@ class RemainingAmethystOverlay extends Overlay {
 
         String displayedOreRemaining;
         int offset = 0;
-        if (plugin.getMaxOreRemaining() <= -1) {
+        if (plugin.getMaxOreRemaining() <= 0) {
             displayedOreRemaining = "?";
         } else if (plugin.getMaxOreRemaining() - 1 == 0) {
             displayedOreRemaining = plugin.getMaxOreRemaining().toString();

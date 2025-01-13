@@ -10,6 +10,7 @@ import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.api.InventoryID;
+import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.Player;
 import net.runelite.api.Tile;
@@ -71,7 +72,6 @@ public class RemainingAmethystPlugin extends Plugin {
     public void onGameTick(GameTick gameTick) {
 
         Player player = client.getLocalPlayer();
-
         Tile facingTile = getTilePlayerIsFacing(player);
 
         if ((facingTile.getWallObject().getId() == 11388 || facingTile.getWallObject().getId() == 11389) && Mining.isMining(player)) {
@@ -96,9 +96,6 @@ public class RemainingAmethystPlugin extends Plugin {
                 case "You manage to mine some amethyst.":
                     this.maxOreRemaining -= 1;
                     break;
-                case "The Varrock platebody enabled you to mine an additional ore.":
-                    this.maxOreRemaining -= 1;
-                    break;
             }
         }
     }
@@ -108,11 +105,12 @@ public class RemainingAmethystPlugin extends Plugin {
         if (objectDespawned.getWallObject().equals(this.lastInteractedAmethyst)) {
 
             ItemContainer equipment = client.getItemContainer(InventoryID.EQUIPMENT);
-            if (equipment.getItem(EquipmentInventorySlot.GLOVES.getSlotIdx()).equals(21392)) {
-                System.out.println("Expert mining gloves detected.");
-                wearingExpertMiningGloves = true;
+            Item gloves = equipment.getItem(EquipmentInventorySlot.GLOVES.getSlotIdx());
+            if (gloves != null && gloves.getId() == 21392) {
+                this.maxOreRemaining = 4;
+            } else {
+                this.maxOreRemaining = 3;
             }
-            this.maxOreRemaining = 4;
             this.lastInteractedAmethyst = null;
         }
     }
