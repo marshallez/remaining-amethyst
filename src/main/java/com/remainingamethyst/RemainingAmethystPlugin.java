@@ -17,6 +17,7 @@ import net.runelite.api.Tile;
 import net.runelite.api.WallObject;
 import net.runelite.api.coords.Angle;
 import net.runelite.api.coords.Direction;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
@@ -58,6 +59,8 @@ public class RemainingAmethystPlugin extends Plugin {
 
     public final Integer MAX_ORES_EXPERT_MINING_GLOVES = 4;
     public final Integer MAX_ORES_NORMAL = 3;
+
+    private final Integer EXPERT_MINING_GLOVES_ID = 21392;
 
     @Override
     protected void startUp() {
@@ -115,7 +118,7 @@ public class RemainingAmethystPlugin extends Plugin {
 
             ItemContainer equipment = client.getItemContainer(InventoryID.EQUIPMENT);
             Item gloves = equipment.getItem(EquipmentInventorySlot.GLOVES.getSlotIdx());
-            if (gloves != null && gloves.getId() == 21392) {
+            if (gloves != null && gloves.getId() == EXPERT_MINING_GLOVES_ID) {
                 this.maxOreRemaining = this.MAX_ORES_EXPERT_MINING_GLOVES;
                 this.wearingMiningGloves = true;
             } else {
@@ -135,19 +138,9 @@ public class RemainingAmethystPlugin extends Plugin {
         WorldPoint playerLocation = player.getWorldLocation();
         Direction playerOrientation = new Angle(player.getOrientation()).getNearestDirection();
         WorldPoint facingPoint = neighborPoint(playerLocation, playerOrientation);
+        LocalPoint local = LocalPoint.fromWorld(client, facingPoint);
         Tile tiles[][][] = player.getWorldView().getScene().getTiles();
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[i].length; j++) {
-                for (int k = 0; k < tiles[i][j].length; k++) {
-                    if (tiles[i][j][k] != null) {
-                        if (tiles[i][j][k].getWorldLocation().equals(facingPoint)) {
-                            return tiles[i][j][k];
-                        }
-                    }
-                }
-            }
-        }
-        return null;
+        return tiles[facingPoint.getPlane()][local.getSceneX()][local.getSceneY()];
     }
 
     WorldPoint neighborPoint(WorldPoint point, Direction direction) {
