@@ -12,10 +12,6 @@ import net.runelite.api.Tile;
 
 public class Mining {
 
-    public enum OreType {
-        AMETHYST,
-    }
-
     private static Set<Integer> miningAnimations = new HashSet<>(Arrays.asList(
             AnimationID.MINING_MOTHERLODE_3A,
             AnimationID.MINING_MOTHERLODE_ADAMANT,

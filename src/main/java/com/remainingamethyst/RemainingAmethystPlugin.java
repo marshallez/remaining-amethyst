@@ -51,9 +51,13 @@ public class RemainingAmethystPlugin extends Plugin {
     @Getter
     private Integer maxOreRemaining = -1;
 
-    private boolean wearingExpertMiningGloves = false;
+    @Getter
+    private boolean wearingMiningGloves = false;
 
     private int ticksWithoutInteracting = 0;
+
+    public final Integer MAX_ORES_EXPERT_MINING_GLOVES = 4;
+    public final Integer MAX_ORES_NORMAL = 3;
 
     @Override
     protected void startUp() {
@@ -74,17 +78,23 @@ public class RemainingAmethystPlugin extends Plugin {
         Player player = client.getLocalPlayer();
         Tile facingTile = getTilePlayerIsFacing(player);
 
+        if (ticksWithoutInteracting >= config.highlightTicks() && !config.stayHighlighted()) {
+            lastInteractedAmethyst = null;
+            ticksWithoutInteracting = 0;
+        }
+
+        if (facingTile.getWallObject() == null) {
+            ticksWithoutInteracting += 1;
+            return;
+        }
+
         if ((facingTile.getWallObject().getId() == 11388 || facingTile.getWallObject().getId() == 11389) && Mining.isMining(player)) {
             lastInteractedAmethyst = facingTile.getWallObject();
             ticksWithoutInteracting = 0;
-        } else {
-            ticksWithoutInteracting += 1;
-
-            if (ticksWithoutInteracting >= 5) {
-                lastInteractedAmethyst = null;
-                ticksWithoutInteracting = 0;
-            }
+            return;
         }
+
+        ticksWithoutInteracting += 1;
     }
 
     @Subscribe
@@ -107,12 +117,19 @@ public class RemainingAmethystPlugin extends Plugin {
             ItemContainer equipment = client.getItemContainer(InventoryID.EQUIPMENT);
             Item gloves = equipment.getItem(EquipmentInventorySlot.GLOVES.getSlotIdx());
             if (gloves != null && gloves.getId() == 21392) {
-                this.maxOreRemaining = 4;
+                this.maxOreRemaining = this.MAX_ORES_EXPERT_MINING_GLOVES;
+                this.wearingMiningGloves = true;
             } else {
-                this.maxOreRemaining = 3;
+                this.maxOreRemaining = this.MAX_ORES_NORMAL;
+                this.wearingMiningGloves = false;
             }
             this.lastInteractedAmethyst = null;
         }
+    }
+
+    @Provides
+    RemainingAmethystConfig provideConfig(ConfigManager configManager) {
+        return configManager.getConfig(RemainingAmethystConfig.class);
     }
 
     Tile getTilePlayerIsFacing(Player player) {
@@ -132,11 +149,6 @@ public class RemainingAmethystPlugin extends Plugin {
             }
         }
         return null;
-    }
-
-    @Provides
-    RemainingAmethystConfig provideConfig(ConfigManager configManager) {
-        return configManager.getConfig(RemainingAmethystConfig.class);
     }
 
     WorldPoint neighborPoint(WorldPoint point, Direction direction) {
