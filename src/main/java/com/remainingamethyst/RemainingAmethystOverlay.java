@@ -12,7 +12,6 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
-import net.runelite.client.util.ColorUtil;
 
 class RemainingAmethystOverlay extends Overlay {
 
@@ -32,8 +31,6 @@ class RemainingAmethystOverlay extends Overlay {
         if (plugin.getLastInteractedAmethyst() == null) {
             return null;
         }
-
-        Color greenBorder = ColorUtil.colorWithAlpha(Color.GREEN, 200);
 
         WallObject amethyst = plugin.getLastInteractedAmethyst();
 

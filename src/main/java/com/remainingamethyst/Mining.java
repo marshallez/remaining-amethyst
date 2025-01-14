@@ -12,7 +12,7 @@ import net.runelite.api.Tile;
 
 public class Mining {
 
-    private static Set<Integer> miningAnimations = new HashSet<>(Arrays.asList(
+    private static final Set<Integer> miningAnimations = new HashSet<>(Arrays.asList(
             AnimationID.MINING_MOTHERLODE_3A,
             AnimationID.MINING_MOTHERLODE_ADAMANT,
             AnimationID.MINING_MOTHERLODE_BLACK,
@@ -31,16 +31,12 @@ public class Mining {
             AnimationID.MINING_MOTHERLODE_CRYSTAL
     ));
 
-    private static Set<Integer> miningOres = new HashSet<>(Arrays.asList(
+    private static final Set<Integer> miningOres = new HashSet<>(Arrays.asList(
             ObjectID.AMETHYST_CRYSTALS,
             ObjectID.AMETHYST_CRYSTALS_11389));
 
     public static boolean isMining(Player player) {
-        if (miningAnimations.contains(player.getAnimation())) {
-            return true;
-        }
-
-        return false;
+        return miningAnimations.contains(player.getAnimation());
 
     }
 
