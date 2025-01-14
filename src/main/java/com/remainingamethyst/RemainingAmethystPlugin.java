@@ -100,7 +100,6 @@ public class RemainingAmethystPlugin extends Plugin {
     @Subscribe
     public void onChatMessage(ChatMessage event) {
         String chatMessage = event.getMessage();
-        System.out.println(chatMessage);
         if (event.getType() == ChatMessageType.SPAM || event.getType() == ChatMessageType.GAMEMESSAGE) {
             switch (chatMessage) {
                 case "You manage to mine some amethyst.":
