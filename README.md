@@ -1,4 +1,4 @@
-# Remaining Amethyst
+# Remaining Amethyst | [![Plugin Installs](http://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/installs/plugin/remaining-amethyst)](https://runelite.net/plugin-hub/Marshallez)
 Shows the number of amethyst ores remaining in the rock.
 
 ![?](https://github.com/user-attachments/assets/4cb20dab-44c8-47ed-bf6c-66d645f0cbc9)
